@@ -1,13 +1,13 @@
 # Copyright UCL Business plc 2017. Patent Pending. All rights reserved. 
 #
-# The MonoDepth Software is licensed under the terms of the UCLB ACP-A licence
+# The superdepth Software is licensed under the terms of the UCLB ACP-A licence
 # which allows for non-commercial use only, the full terms of which are made
 # available in the LICENSE file.
 #
 # For any other use of the software not covered by the UCLB ACP-A Licence, 
 # please contact info@uclb.com
 
-"""Monodepth data loader.
+"""superdepth data loader.
 """
 
 from __future__ import absolute_import, division, print_function
@@ -17,8 +17,8 @@ import tensorflow as tf
 def string_length_tf(t):
   return tf.py_func(len, [t], [tf.int64])
 
-class MonodepthDataloader(object):
-    """monodepth dataloader"""
+class superdepthDataloader(object):
+    """superdepth dataloader"""
 
     def __init__(self, data_path, filenames_file, params, dataset, mode):
         self.data_path = data_path

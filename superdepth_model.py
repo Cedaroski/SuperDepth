@@ -1,6 +1,6 @@
 # Copyright UCL Business plc 2017. Patent Pending. All rights reserved. 
 #
-# The MonoDepth Software is licensed under the terms of the UCLB ACP-A licence
+# The superdepth Software is licensed under the terms of the UCLB ACP-A licence
 # which allows for non-commercial use only, the full terms of which are made
 # available in the LICENSE file.
 #
@@ -9,7 +9,7 @@
 
 """Fully convolutional model for monocular depth estimation
     by Clement Godard, Oisin Mac Aodha and Gabriel J. Brostow
-    http://visual.cs.ucl.ac.uk/pubs/monoDepth/
+    http://visual.cs.ucl.ac.uk/pubs/superdepth/
 """
 
 from __future__ import absolute_import, division, print_function
@@ -21,7 +21,7 @@ import tensorflow.contrib.slim as slim
 
 from bilinear_sampler import *
 
-monodepth_parameters = namedtuple('parameters', 
+superdepth_parameters = namedtuple('parameters', 
                         'encoder, '
                         'height, width, '
                         'batch_size, '
@@ -35,8 +35,8 @@ monodepth_parameters = namedtuple('parameters',
                         'lr_loss_weight, '
                         'full_summary')
 
-class MonodepthModel(object):
-    """monodepth model"""
+class superdepthModel(object):
+    """superdepth model"""
 
     def __init__(self, params, mode, left, right, reuse_variables=None, model_index=0):
         self.params = params

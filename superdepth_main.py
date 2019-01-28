@@ -1,6 +1,6 @@
 # Copyright UCL Business plc 2017. Patent Pending. All rights reserved.
 #
-# The MonoDepth Software is licensed under the terms of the UCLB ACP-A licence
+# The superdepth Software is licensed under the terms of the UCLB ACP-A licence
 # which allows for non-commercial use only, the full terms of which are made
 # available in the LICENSE file.
 #
@@ -20,14 +20,14 @@ import time
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-from monodepth_model import *
-from monodepth_dataloader import *
+from superdepth_model import *
+from superdepth_dataloader import *
 from average_gradients import *
 
-parser = argparse.ArgumentParser(description='Monodepth TensorFlow implementation.')
+parser = argparse.ArgumentParser(description='superdepth TensorFlow implementation.')
 
 parser.add_argument('--mode',                      type=str,   help='train or test', default='train')
-parser.add_argument('--model_name',                type=str,   help='model name', default='monodepth')
+parser.add_argument('--model_name',                type=str,   help='model name', default='superdepth')
 parser.add_argument('--encoder',                   type=str,   help='type of encoder, vgg or resnet50', default='vgg')
 parser.add_argument('--dataset',                   type=str,   help='dataset to train on, kitti, or cityscapes', default='kitti')
 parser.add_argument('--data_path',                 type=str,   help='path to the data', required=True)
@@ -92,7 +92,7 @@ def train(params):
         print("total number of samples: {}".format(num_training_samples))
         print("total number of steps: {}".format(num_total_steps))
 
-        dataloader = MonodepthDataloader(args.data_path, args.filenames_file, params, args.dataset, args.mode)
+        dataloader = superdepthDataloader(args.data_path, args.filenames_file, params, args.dataset, args.mode)
         left  = dataloader.left_image_batch
         right = dataloader.right_image_batch
 
@@ -107,7 +107,7 @@ def train(params):
             for i in range(args.num_gpus):
                 with tf.device('/gpu:%d' % i):
 
-                    model = MonodepthModel(params, args.mode, left_splits[i], right_splits[i], reuse_variables, i)
+                    model = superdepthModel(params, args.mode, left_splits[i], right_splits[i], reuse_variables, i)
 
                     loss = model.total_loss
                     tower_losses.append(loss)
@@ -179,11 +179,11 @@ def train(params):
 def test(params):
     """Test function."""
 
-    dataloader = MonodepthDataloader(args.data_path, args.filenames_file, params, args.dataset, args.mode)
+    dataloader = superdepthDataloader(args.data_path, args.filenames_file, params, args.dataset, args.mode)
     left  = dataloader.left_image_batch
     right = dataloader.right_image_batch
 
-    model = MonodepthModel(params, args.mode, left, right)
+    model = superdepthModel(params, args.mode, left, right)
 
     # SESSION
     config = tf.ConfigProto(allow_soft_placement=True)
@@ -229,7 +229,7 @@ def test(params):
 
 def main(_):
 
-    params = monodepth_parameters(
+    params = superdepth_parameters(
         encoder=args.encoder,
         height=args.input_height,
         width=args.input_width,

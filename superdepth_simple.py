@@ -1,6 +1,6 @@
 # Copyright UCL Business plc 2017. Patent Pending. All rights reserved.
 #
-# The MonoDepth Software is licensed under the terms of the UCLB ACP-A licence
+# The superdepth Software is licensed under the terms of the UCLB ACP-A licence
 # which allows for non-commercial use only, the full terms of which are made
 # available in the LICENSE file.
 #
@@ -26,7 +26,7 @@ from superdepth_model import *
 from superdepth_dataloader import *
 from average_gradients import *
 
-parser = argparse.ArgumentParser(description='Monodepth TensorFlow implementation.')
+parser = argparse.ArgumentParser(description='superdepth TensorFlow implementation.')
 
 parser.add_argument('--encoder',          type=str,   help='type of encoder, vgg or resnet50', default='vgg')
 parser.add_argument('--image_path',       type=str,   help='path to the image', required=True)
@@ -50,7 +50,7 @@ def test_simple(params):
     """Test function."""
 
     left  = tf.placeholder(tf.float32, [2, args.input_height, args.input_width, 3])
-    model = MonodepthModel(params, "test", left, None)
+    model = superdepthModel(params, "test", left, None)
 
     input_image = scipy.misc.imread(args.image_path, mode="RGB")
     original_height, original_width, num_channels = input_image.shape
@@ -89,7 +89,7 @@ def test_simple(params):
 
 def main(_):
 
-    params = monodepth_parameters(
+    params = superdepth_parameters(
         encoder=args.encoder,
         height=args.input_height,
         width=args.input_width,
