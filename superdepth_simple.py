@@ -22,8 +22,8 @@ import tensorflow.contrib.slim as slim
 import scipy.misc
 import matplotlib.pyplot as plt
 
-from monodepth_model import *
-from monodepth_dataloader import *
+from superdepth_model import *
+from superdepth_dataloader import *
 from average_gradients import *
 
 parser = argparse.ArgumentParser(description='Monodepth TensorFlow implementation.')
