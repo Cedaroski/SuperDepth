@@ -20,6 +20,7 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
 from bilinear_sampler import *
+from utils import *
 
 superdepth_parameters = namedtuple('parameters', 
                         'encoder, '
@@ -44,7 +45,12 @@ class superdepthModel(object):
         self.left = left
         self.right = right
         self.model_collection = ['model_' + str(model_index)]
-
+        yts = tf.ones([6, 1], dtype=tf.float32)
+        self.xts = tf.Variable(initial_value=[[1, 1, 1, 1, 1, 1]], dtype=tf.float32)
+        self.intrinsics = tf.Variable(initial_value=[[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=tf.float32)
+        self.intrinsics = tf.expand_dims(self.intrinsics, 0)
+        self.xts =yts*self.xts
+        #self.intrinsics=yts*self.intrinsics
         self.reuse_variables = reuse_variables
 
         self.build_model()
@@ -81,6 +87,11 @@ class superdepthModel(object):
             nw = w // ratio
             scaled_imgs.append(tf.image.resize_area(img, [nh, nw]))
         return scaled_imgs
+
+    def generate_proj_left(self, img, disp):
+
+        depth = normalize_depth_for_display(disp)
+        return projective_inverse_warp(img, depth, self.xts, self.intrinsics)
 
     def generate_image_left(self, img, disp):
 
@@ -226,24 +237,24 @@ class superdepthModel(object):
             concat4 = tf.concat([upconv4, skip3], 3)
             iconv4  = conv(concat4,  128, 3, 1)
             self.disp4 = self.get_disp(iconv4)
-            udisp4  = self.upsample_nn(self.disp4, 2)
+            udisp4  = self.upsample_nn(self.disp4, 2) # 32 64 2
 
             upconv3 = upconv(iconv4,  64, 3, 2) #H/4
             concat3 = tf.concat([upconv3, skip2, udisp4], 3)
             iconv3  = conv(concat3,   64, 3, 1)
             self.disp3 = self.get_disp(iconv3)
-            udisp3  = self.upsample_nn(self.disp3, 2)
+            udisp3  = self.upsample_nn(self.disp3, 2) # 64 128 2
 
             upconv2 = upconv(iconv3,  32, 3, 2) #H/2
             concat2 = tf.concat([upconv2, skip1, udisp3], 3)
             iconv2  = conv(concat2,   32, 3, 1)
             self.disp2 = self.get_disp(iconv2)
-            udisp2  = self.upsample_nn(self.disp2, 2)
+            udisp2  = self.upsample_nn(self.disp2, 2) # 128 256 2
 
             upconv1 = upconv(iconv2,  16, 3, 2) #H
             concat1 = tf.concat([upconv1, udisp2], 3)
             iconv1  = conv(concat1,   16, 3, 1)
-            self.disp1 = self.get_disp(iconv1)
+            self.disp1 = self.get_disp(iconv1) # 512 256 2
 
     def build_espcn(self):
         # set convenience functions
