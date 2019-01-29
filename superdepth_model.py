@@ -170,6 +170,20 @@ class superdepthModel(object):
         conv = slim.conv2d_transpose(p_x, num_out_layers, kernel_size, scale, 'SAME')
         return conv[:,3:-1,3:-1,:]
 
+    def remap(self, x):
+
+        return x
+
+    def espcnblock(self, x):
+        iconv4 = self.conv(x, 32, 3, 1, activation_fn=tf.nn.relu)
+        iconv3 = self.conv(iconv4, 32, 3, 1, activation_fn=tf.nn.relu)
+        iconv2 = self.conv(iconv3, 32, 3, 1, activation_fn=tf.nn.relu)
+        iconv1 = self.conv(iconv2, 16, 3, 1, activation_fn=tf.nn.relu)
+        disp = self.remap(iconv1)
+        return disp
+
+
+
     def build_vgg(self):
         #set convenience functions
         conv = self.conv
@@ -230,6 +244,53 @@ class superdepthModel(object):
             concat1 = tf.concat([upconv1, udisp2], 3)
             iconv1  = conv(concat1,   16, 3, 1)
             self.disp1 = self.get_disp(iconv1)
+
+    def build_espcn(self):
+        # set convenience functions
+        conv = self.conv
+        if self.params.use_deconv:
+            upconv = self.deconv
+        else:
+            upconv = self.upconv
+
+        with tf.variable_scope('encoder'):
+            conv1 = self.conv_block(self.model_input, 32, 7)  # H/2  #(input, num_out_layers, kernel_size):
+            conv2 = self.conv_block(conv1, 64, 5)  # H/4
+            conv3 = self.conv_block(conv2, 128, 3)  # H/8
+            conv4 = self.conv_block(conv3, 256, 3)  # H/16
+            conv5 = self.conv_block(conv4, 512, 3)  # H/32
+            conv6 = self.conv_block(conv5, 512, 3)  # H/64
+            conv7 = self.conv_block(conv6, 512, 3)  # H/128
+
+        with tf.variable_scope('skips'):
+            skip1 = conv1
+            skip2 = conv2
+            skip3 = conv3
+            skip4 = conv4
+            skip5 = conv5
+            skip6 = conv6
+
+        with tf.variable_scope('decoder'):
+            upconv7 = upconv(conv7, 512, 3, 2)  # H/64
+            concat7 = tf.concat([upconv7, skip6], 3)
+            iconv7 = conv(concat7, 512, 3, 1)
+
+            upconv6 = upconv(iconv7, 512, 3, 2)  # H/32
+            concat6 = tf.concat([upconv6, skip5], 3)
+            iconv6 = conv(concat6, 512, 3, 1)
+
+            upconv5 = upconv(iconv6, 256, 3, 2)  # H/16
+            concat5 = tf.concat([upconv5, skip4], 3)
+            iconv5 = conv(concat5, 256, 3, 1)
+
+
+            # Here we present the espcn method
+
+            self.disp4 = self.espcnblock(iconv5)
+            self.disp3 = self.espcnblock(self.disp4)
+            self.disp2 = self.espcnblock(self.disp3)
+            self.disp1 = self.espcnblock(self.disp2)
+
 
     def build_resnet50(self):
         #set convenience functions
