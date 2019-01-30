@@ -45,12 +45,14 @@ class superdepthModel(object):
         self.left = left
         self.right = right
         self.model_collection = ['model_' + str(model_index)]
-        yts = tf.ones([6, 1], dtype=tf.float32)
+        yts = tf.ones([self.params.batch_size, 1], dtype=tf.float32)
+        yts_batch = tf.ones([self.params.batch_size, 1, 1], dtype=tf.float32)
         self.xts = tf.Variable(initial_value=[[1, 1, 1, 1, 1, 1]], dtype=tf.float32)
         self.intrinsics = tf.Variable(initial_value=[[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=tf.float32)
+        #self.xts = tf.expand_dims(self.xts, 0, dim=self.params.batch_size)
         self.intrinsics = tf.expand_dims(self.intrinsics, 0)
         self.xts =yts*self.xts
-        #self.intrinsics=yts*self.intrinsics
+        self.intrinsics=yts_batch*self.intrinsics
         self.reuse_variables = reuse_variables
 
         self.build_model()
